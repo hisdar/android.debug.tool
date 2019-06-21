@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Config>
+    <mark>MarkAttribute : name=l attr; keyWord=l; matchCapitals=false; matchWholeWords=false; foreground=java.awt.Color[r=0,g=0,b=0]; background=java.awt.Color[r=50,g=255,b=50]; fontStyle=0</mark>
+    <mark>MarkAttribute : name=ls attr; keyWord=ls; matchCapitals=false; matchWholeWords=false; foreground=java.awt.Color[r=0,g=0,b=0]; background=java.awt.Color[r=50,g=255,b=50]; fontStyle=0</mark>
+</Config>
