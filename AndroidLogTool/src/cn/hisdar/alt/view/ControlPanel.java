@@ -27,8 +27,6 @@ public class ControlPanel extends JPanel {
 	private JButton openLogFolderButton;
 	private JButton newLogFileButton;
 	
-	private LogFilterPanel logFilterPanel;
-	
 	private JPanel controlButtonPanel;
 	
 	public ControlPanel() {
@@ -85,13 +83,6 @@ public class ControlPanel extends JPanel {
 		setLayout(new BorderLayout());
 		add(controlButtonPanel, BorderLayout.WEST);
 		
-		logFilterPanel = new LogFilterPanel();
-		logFilterPanel.setPreferredSize(new Dimension(400, 25));
-		logFilterPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-		add(logFilterPanel, BorderLayout.EAST);
 	}
 	
-	public void addLogFiterListener(LogFilterListener l) {
-		logFilterPanel.addLogFiterListener(l);
-	}
 }

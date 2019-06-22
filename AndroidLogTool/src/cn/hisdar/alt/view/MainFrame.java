@@ -74,7 +74,6 @@ public class MainFrame extends JFrame {
 		
 		controlPanel = new ControlPanel();
 		add(controlPanel, BorderLayout.NORTH);
-		controlPanel.addLogFiterListener(logPanel);
 		
 		settingsDialog = new SettingsDialog(this);
 		Global.setSettingsDialog(settingsDialog);

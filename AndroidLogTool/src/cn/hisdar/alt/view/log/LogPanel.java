@@ -42,6 +42,8 @@ implements AndroidDeviceListener, LogFilterListener
 		
 		setLayout(new BorderLayout());
 		add(logViewAndControl, BorderLayout.CENTER);
+		
+		logControlView.getLogFilterPanel().addLogFiterListener(this);
 		AndroidDeviceManager.getInstance().addAndroidDeviceListener(this);
 	}
 
