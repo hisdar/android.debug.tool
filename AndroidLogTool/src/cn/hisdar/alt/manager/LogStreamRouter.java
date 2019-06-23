@@ -209,7 +209,11 @@ public class LogStreamRouter {
 					continue;
 				}
 				
-				logView.output(logString);
+				if (!logView.isPaused()) {
+					logView.output(logString);
+				} else {
+					
+				}
 			}
 			
 			isThreadRunning = false;

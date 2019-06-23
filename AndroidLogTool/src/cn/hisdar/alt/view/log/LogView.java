@@ -31,33 +31,20 @@ import cn.hisdar.lib.configuration.HConfig;
 import cn.hisdar.lib.log.HLog;
 
 public class LogView extends JPanel
-implements AdjustmentListener, ActionListener {
+implements AdjustmentListener, LogViewControlListener {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
 	private LogDocument          doc;
 	private JTextPane            logArea;
 	private JScrollBar           verticalBar;
 	private StyleContext         styleContext;
 	private JScrollPane          logScrollPanel;
 	private LineNumberHeaderView lineNumberHeaderView;
-	
-	private JMenu                addMarkMenu;
-	private JMenu                delMarkMenu;
-	private JMenuItem            setAutoMarkItem;
-	private JMenuItem            editMarkMenuItem;
-	private JPopupMenu           logAreaPopupMenu;
-	private JMenuItem            pauseItem;
-	private JMenuItem            startItem;
-	private JMenuItem            copyItem;
-	private JMenuItem            saveItem;
-	private JMenuItem            enableAutoMarkItem;
-	private JMenuItem            disableAutoMarkItem;
-	private JMenuItem            enableAutoScrollItem;
-	private JMenuItem            disableAutoScrollItem;
-	private JMenuItem            disableAtuoScrollWhenSelecteTextItem;
+	private LogViewPopupMenu     logViewPopupMenu;
 	
 	private ArrayList<MarkAttributeStyle> filters;
 	private MouseEventAdapter mouseEventAdapter;
@@ -67,10 +54,13 @@ implements AdjustmentListener, ActionListener {
 	private boolean isAutoScroll = true;
 	private boolean isSelectedText = false;
 	private boolean isDisableAutoWhenSelecteText = false;
+	
+	private boolean isPaused = false;
 
 	public LogView() {
 		filters = new ArrayList<>();
 		mouseEventAdapter = new MouseEventAdapter();
+		logViewPopupMenu  = new LogViewPopupMenu();
 		
 		styleContext = new StyleContext();
         doc = new LogDocument(styleContext);
@@ -90,59 +80,13 @@ implements AdjustmentListener, ActionListener {
 		
 		verticalBar = logScrollPanel.getVerticalScrollBar();
 		
-		initPopupMenu();
-		
 		verticalBar.addAdjustmentListener(this);
 		verticalBar.addMouseMotionListener(mouseEventAdapter);
 		
 		logArea.addMouseListener(mouseEventAdapter);
 		//logArea.addMouseWheelListener(this);
-	}
-	
-	private void initPopupMenu() {
-		logAreaPopupMenu = new JPopupMenu();
-		addMarkMenu      = new JMenu("添加标记");
-		delMarkMenu      = new JMenu("删除标记");
-		pauseItem        = new JMenuItem("暂停");
-		startItem        = new JMenuItem("开始");
-		copyItem         = new JMenuItem("复制");
-		saveItem         = new JMenuItem("保存");
-		enableAutoMarkItem  = new JMenuItem("开启标记");
-		disableAutoMarkItem = new JMenuItem("关闭标记");
-		setAutoMarkItem     = new JMenuItem("自动标记设置");
-		editMarkMenuItem    = new JMenuItem("编辑标记菜单项");
 		
-		enableAutoScrollItem = new JMenuItem("开启垂直滚动条自动滚动");
-		disableAutoScrollItem = new JMenuItem("关闭垂直滚动条自动滚动");
-		disableAtuoScrollWhenSelecteTextItem = new JMenuItem("选中内容后停止自动滚动");
-		
-		logAreaPopupMenu.add(copyItem);
-		logAreaPopupMenu.add(saveItem);
-		logAreaPopupMenu.add(startItem);
-		logAreaPopupMenu.add(pauseItem);
-		
-		logAreaPopupMenu.addSeparator();
-		logAreaPopupMenu.add(addMarkMenu);
-		logAreaPopupMenu.add(delMarkMenu);
-		logAreaPopupMenu.add(enableAutoMarkItem);
-		logAreaPopupMenu.add(disableAutoMarkItem);
-		logAreaPopupMenu.add(setAutoMarkItem);
-		logAreaPopupMenu.add(editMarkMenuItem);
-		
-		logAreaPopupMenu.addSeparator();
-		logAreaPopupMenu.add(enableAutoScrollItem);
-		logAreaPopupMenu.add(disableAutoScrollItem);
-		logAreaPopupMenu.add(disableAtuoScrollWhenSelecteTextItem);
-		
-		loadMarkConfig();
-		
-		enableAutoScrollItem.setEnabled(false);
-		disableAtuoScrollWhenSelecteTextItem.setSelected(isDisableAutoWhenSelecteText);
-		
-		editMarkMenuItem.addActionListener(this);
-		enableAutoScrollItem.addActionListener(this);
-		disableAutoScrollItem.addActionListener(this);
-		disableAtuoScrollWhenSelecteTextItem.addActionListener(this);
+		logViewPopupMenu.addControlListener(this);
 	}
 	
 	public MarkAttributeStyle createFilterAttribute(MarkAttribute attr) {
@@ -242,6 +186,16 @@ implements AdjustmentListener, ActionListener {
 		logArea.setText("");
 	}
 	
+	
+	
+	public boolean isPaused() {
+		return isPaused;
+	}
+
+	public void setPaused(boolean isPaused) {
+		this.isPaused = isPaused;
+	}
+
 	private void updateDocumentAttributes(int startIndex, int length) {
 		int docLength = doc.getLength();
 		if (startIndex + length >= docLength) {
@@ -279,45 +233,11 @@ implements AdjustmentListener, ActionListener {
 	
 	private void handleLogAreaMouseEvent(MouseEvent e) {
 		if (e.getButton() == MouseEvent.BUTTON3) {
-			logAreaPopupMenu.show(logArea, e.getX(), e.getY());
+			logViewPopupMenu.getLogAreaPopupMenu().show(logArea, e.getX(), e.getY());
 		} else if (e.getButton() == MouseEvent.BUTTON1) {
 			if (logArea.getSelectionEnd() - logArea.getSelectionStart() > 0) {
 				isSelectedText = true;
 			}
-		}
-	}
-	
-	private void loadMarkConfig() {
-		
-		HConfig markConfig = null;
-		try {
-			markConfig = HConfig.getInstance("./config/mark/user-def.xml");
-		}catch (Exception e) {
-			return;
-		}
-		
-		if (markConfig == null) {
-			return;
-		}
-		
-		ArrayList<ConfigItem> markConfigs = markConfig.getConfigItemList();
-		if (markConfigs == null || markConfigs.size() <= 0) {
-			return;
-		}
-		
-		for (int i = 0; i < markConfigs.size(); i++) {
-			ConfigItem configItem = markConfigs.get(i);
-			MarkAttribute attr = MarkAttribute.parseFromString(configItem.getValue());
-			JMenuItem item = new JMenuItem(attr.getName());
-			item.setBackground(attr.getBackground());
-			item.setForeground(attr.getForeground());
-			
-			addMarkMenu.add(item);
-			
-			item = new JMenuItem(attr.getName());
-			item.setBackground(attr.getBackground());
-			item.setForeground(attr.getForeground());
-			delMarkMenu.add(item);
 		}
 	}
 
@@ -375,28 +295,23 @@ implements AdjustmentListener, ActionListener {
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == enableAutoScrollItem) {
+	public void logViewControlEvent(LogViewControlEvent event) {
+		switch (event.eventCode) {
+		case LogViewControlEvent.LOG_VIEW_CONTROL_EVENT_CLEAR:
+			clear();
+			break;
+		case LogViewControlEvent.LOG_VIEW_CONTROL_EVENT_PAUSE:
+			break;
+		case LogViewControlEvent.LOG_VIEW_CONTROL_EVENT_START:
+			break;
+		case LogViewControlEvent.LOG_VIEW_CONTROL_EVENT_ENABLE_AUTO_SCROLL:
 			isAutoScroll = true;
-			enableAutoScrollItem.setEnabled(false);
-			disableAutoScrollItem.setEnabled(true);
-			
-			disableAtuoScrollWhenSelecteTextItem.setEnabled(isDisableAutoWhenSelecteText);
-		} else if (e.getSource() == disableAutoScrollItem) {
+			break;
+		case LogViewControlEvent.LOG_VIEW_CONTROL_EVENT_DISABLE_AUTO_SCROLL:
 			isAutoScroll = false;
-			disableAutoScrollItem.setEnabled(false);
-			enableAutoScrollItem.setEnabled(true);
-			disableAtuoScrollWhenSelecteTextItem.setEnabled(false);
-		} else if (e.getSource() == disableAtuoScrollWhenSelecteTextItem) {
-			isDisableAutoWhenSelecteText = disableAtuoScrollWhenSelecteTextItem.isSelected();
-			if (disableAtuoScrollWhenSelecteTextItem.isSelected()) {
-				disableAtuoScrollWhenSelecteTextItem.setSelected(false);
-			} else {
-				disableAtuoScrollWhenSelecteTextItem.setSelected(true);
-			}
-		} else if (e.getSource() == editMarkMenuItem) {
-			Global.getSettingsDialog().show(SettingsDialog.SETTINGS_MARK);
+			break;
+		default:
+			break;
 		}
 	}
-
 }
